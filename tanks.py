@@ -546,7 +546,7 @@ class Tank():
 
 	def __init__(self, level, side, position = None, direction = None, filename = None):
 
-		global sprites
+		global sprites, joystick
 
 		# health. 0 health means dead
 		self.health = 100
@@ -583,6 +583,7 @@ class Tank():
 
 		# navigation keys: fire, up, right, down, left
 		self.controls = [pygame.K_SPACE, pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT]
+		self.joy_controls = [1, (0, 1), (1, 0), (0, -1), (-1, 0), (0, 0)]
 
 		# currently pressed buttons (navigation only)
 		self.pressed = [False] * 4
@@ -1247,7 +1248,7 @@ class Game():
 
 	def __init__(self):
 
-		global screen, sprites, play_sounds, sounds
+		global screen, sprites, play_sounds, sounds, joystick
 
 		# center window
 		os.environ['SDL_VIDEO_WINDOW_POS'] = 'center'
@@ -1257,6 +1258,9 @@ class Game():
 
 		pygame.init()
 
+		pygame.joystick.init()
+		joystick = pygame.joystick.Joystick(0)
+		joystick.init()
 
 		pygame.display.set_caption("Battle City")
 
@@ -1444,7 +1448,7 @@ class Game():
 		exit from this screen and start the game with selected number of players
 		"""
 
-		global players, screen
+		global players, screen, joystick
 
 		# stop game main loop (if any)
 		self.running = False
@@ -1458,12 +1462,27 @@ class Game():
 		self.animateIntroScreen()
 
 		main_loop = True
+
 		while main_loop:
 			time_passed = self.clock.tick(50)
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					quit()
+				elif event.type == pygame.JOYHATMOTION:
+					if joystick.get_hat(0)[1] == 1:
+						if self.nr_of_players == 2:
+							self.nr_of_players = 1
+							self.drawIntroScreen()
+					elif joystick.get_hat(0)[1] == -1:
+						if self.nr_of_players == 1:
+							self.nr_of_players = 2
+							self.drawIntroScreen()
+				elif event.type == pygame.JOYBUTTONDOWN:
+					if joystick.get_button(8):
+						quit()
+					elif joystick.get_button(9):
+						main_loop = False
 				elif event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_q:
 						quit()
@@ -1918,7 +1937,7 @@ class Game():
 	def nextLevel(self):
 		""" Start next level """
 
-		global castle, players, bullets, bonuses, play_sounds, sounds
+		global castle, players, bullets, bonuses, play_sounds, sounds, joystick
 
 		del bullets[:]
 		del enemies[:]
@@ -2008,6 +2027,41 @@ class Game():
 									player.pressed[2] = True
 								elif index == 4:
 									player.pressed[3] = True
+				elif event.type == pygame.JOYBUTTONDOWN and not self.game_over and self.active:
+
+					if event.button == 8:
+						quit()
+					for player in players:
+						if player.state == player.STATE_ALIVE:
+							try:
+								index = player.joy_controls.index(event.button)
+							except:
+								pass
+							else:
+								if index == 0:
+									if player.fire() and play_sounds:
+										sounds["fire"].play()
+				elif event.type == pygame.JOYHATMOTION and not self.game_over and self.active:
+					for player in players:
+						if player.state == player.STATE_ALIVE:
+							try:
+								index = player.joy_controls.index(event.value)
+							except:
+								pass
+							else:
+								if index == 1:
+									player.pressed[0] = True
+								elif index == 2:
+									player.pressed[1] = True
+								elif index == 3:
+									player.pressed[2] = True
+								elif index == 4:
+									player.pressed[3] = True
+								else:
+									player.pressed[0] = False
+									player.pressed[1] = False
+									player.pressed[2] = False
+									player.pressed[3] = False
 				elif event.type == pygame.KEYUP and not self.game_over and self.active:
 					for player in players:
 						if player.state == player.STATE_ALIVE:
@@ -2086,6 +2140,7 @@ if __name__ == "__main__":
 	gtimer = Timer()
 
 	sprites = None
+	joystick = None
 	screen = None
 	players = []
 	enemies = []
