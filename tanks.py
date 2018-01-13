@@ -2132,6 +2132,7 @@ class Game():
         global players, joysticks, screen, game
 
         screen.fill([0, 0, 0])
+        usedJoys = []
 
         for player_id in range(pygame.joystick.get_count()):
 
@@ -2146,8 +2147,10 @@ class Game():
             while screen_loop:
                 for event in pygame.event.get():
                     if event.type == pygame.JOYBUTTONDOWN:
-                        joysticks.append(pygame.joystick.Joystick(event.joy))
-                        screen_loop = False
+                        if event.joy not in usedJoys:
+                            joysticks.append(pygame.joystick.Joystick(event.joy))
+                            usedJoys.append(event.joy)
+                            screen_loop = False
         self.showMenu()
 
 if __name__ == "__main__":
