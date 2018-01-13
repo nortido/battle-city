@@ -1257,6 +1257,8 @@ class Game():
         pygame.init()
 
         pygame.joystick.init()
+        pygame.mouse.set_visible(False)
+        
         for joystick_id in range(pygame.joystick.get_count()):
             joystick = pygame.joystick.Joystick(joystick_id)
             joystick.init()
