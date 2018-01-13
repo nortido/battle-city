@@ -1,6 +1,6 @@
 # Battle City
 
-The project was written to repeat the skills of working with such things as:
+Game for 4 players for Retropie.
 
 ## Install
 
