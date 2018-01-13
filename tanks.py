@@ -2043,6 +2043,8 @@ class Game():
                             vertical_control = round(joysticks[index].get_axis(1))
                             horiontal_control = round(joysticks[index].get_axis(0))
 
+                            player.pressed = [False] * 4
+
                             if vertical_control == -1:
                                 player.pressed[0] = True
                             elif horiontal_control == 1:
@@ -2051,11 +2053,6 @@ class Game():
                                 player.pressed[2] = True
                             elif horiontal_control == -1:
                                 player.pressed[3] = True
-                            else:
-                                player.pressed[0] = False
-                                player.pressed[1] = False
-                                player.pressed[2] = False
-                                player.pressed[3] = False
                 elif event.type == pygame.KEYUP and not self.game_over and self.active:
                     for player in players:
                         if player.state == player.STATE_ALIVE:
