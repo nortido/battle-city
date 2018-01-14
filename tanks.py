@@ -1504,7 +1504,6 @@ class Game():
                 player = Player(
                     self.level, 0, [x, y], self.DIR_UP, (16 * 2, 0, 13 * 2, 13 * 2)
                 )
-                player.controls = [102, 119, 100, 115, 97]
                 players.append(player)
 
         for player in players:
