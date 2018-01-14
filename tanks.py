@@ -2053,31 +2053,46 @@ class Game():
 
             self.draw()
 
-    def mapJoysticks(self):
-        global players, joysticks, screen, game
+    def showMapJoysticksScreen(self):
+        global players, joysticks, screen
 
-        usedJoys = []
+        used_joystick_ids = []
 
         for player_id in range(pygame.joystick.get_count()):
 
+            wait_seconds = 5
             if player_id > 3:
                 continue
-            screen.fill([0, 0, 0])
-            text = "Player " + str(player_id + 1) + " press any button"
-            screen.blit(self.font.render(text, True, pygame.Color('white')), [50, 200])
-            pygame.display.flip()
 
             screen_loop = True
+            text = "Player " + str(player_id + 1) + " press button"
+            self.drawText(text)
 
             while screen_loop:
                 for event in pygame.event.get():
                     if event.type == pygame.JOYBUTTONDOWN:
-                        if event.joy not in usedJoys:
+                        if event.joy not in used_joystick_ids:
                             joystick = retropie_controller.Controller(event.joy)
                             joysticks.append(joystick)
-                            usedJoys.append(event.joy)
+                            used_joystick_ids.append(event.joy)
                             screen_loop = False
+                if len(used_joystick_ids) > 0:
+                    if wait_seconds > 0:
+                        self.clock.tick(1)
+                        wait_seconds -= 1
+                        text += "."
+                        self.drawText(text)
+                    else:
+                        self.clock.tick(1)
+                        self.showMenu()
+
         self.showMenu()
+
+    def drawText(self, text):
+
+        screen.fill([0, 0, 0])
+        screen.blit(self.font.render(text, True, pygame.Color('white')), [50, 200])
+        pygame.display.flip()
 
 if __name__ == "__main__":
     gtimer = Timer()
@@ -2096,4 +2111,4 @@ if __name__ == "__main__":
 
     game = Game()
     castle = Castle()
-    game.mapJoysticks()
+    game.showMapJoysticksScreen()

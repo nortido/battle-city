@@ -148,5 +148,6 @@ class Controller:
         remap_config = self.get_config(map_path)
 
         self.A = int(remap_config['input_a_btn'])
+        self.B = int(remap_config['input_b_btn'])
         self.START = int(remap_config['input_start_btn'])
         self.BACK = int(remap_config['input_select_btn'])
