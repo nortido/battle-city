@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=utf-8
 
-import os, pygame, time, random, uuid, sys
+import os, pygame, time, random, uuid, sys, retropie_controller
 
 
 class myRect(pygame.Rect):
@@ -583,10 +583,6 @@ class Tank():
         # each tank can pick up 1 bonus
         self.bonus = None
 
-        # navigation keys: fire, up, right, down, left
-        self.controls = [pygame.K_SPACE, pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT]
-        self.joy_controls = [1]
-
         # currently pressed buttons (navigation only)
         self.pressed = [False] * 4
 
@@ -853,19 +849,19 @@ class Enemy(Tank):
 
         self.image = images[self.type + 0]
 
-        self.image_up = self.image;
+        self.image_up = self.image
         self.image_left = pygame.transform.rotate(self.image, 90)
         self.image_down = pygame.transform.rotate(self.image, 180)
         self.image_right = pygame.transform.rotate(self.image, 270)
 
         if self.bonus:
-            self.image1_up = self.image_up;
+            self.image1_up = self.image_up
             self.image1_left = self.image_left
             self.image1_down = self.image_down
             self.image1_right = self.image_right
 
             self.image2 = images[self.type + 4]
-            self.image2_up = self.image2;
+            self.image2_up = self.image2
             self.image2_left = pygame.transform.rotate(self.image2, 90)
             self.image2_down = pygame.transform.rotate(self.image2, 180)
             self.image2_right = pygame.transform.rotate(self.image2, 270)
@@ -1433,15 +1429,9 @@ class Game():
         while 1:
             time_passed = self.clock.tick(50)
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    quit()
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        self.showMenu()
-                        return
-                elif event.type == pygame.JOYBUTTONDOWN:
+                if event.type == pygame.JOYBUTTONDOWN:
                     if event.joy == joysticks[0].get_id():
-                        if event.button == 9:
+                        if joysticks[0].get_button('START'):
                             self.showMenu()
                             return
 
@@ -1470,37 +1460,22 @@ class Game():
             time_passed = self.clock.tick(50)
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    quit()
-                elif event.type == pygame.JOYAXISMOTION:
-                    if joysticks[0].get_init():
-                        if round(joysticks[0].get_axis(1)) == -1:
+                if event.type == pygame.JOYAXISMOTION:
+                    if joysticks[0].joystick.get_init():
+                        if round(joysticks[0].get_left_stick()[1]) == -1:
                             if self.nr_of_players == 2:
                                 self.nr_of_players = 1
                                 self.drawIntroScreen()
-                        elif round(joysticks[0].get_axis(1)) == 1:
+                        elif round(joysticks[0].get_left_stick()[1]) == 1:
                             if self.nr_of_players == 1:
                                 self.nr_of_players = 2
                                 self.drawIntroScreen()
                 elif event.type == pygame.JOYBUTTONDOWN:
                     if event.joy == joysticks[0].get_id():
-                        if event.button == 12:
+                        if joysticks[0].get_button('BACK'):
                             quit()
-                        elif event.button == 9:
+                        elif joysticks[0].get_button('START'):
                             main_loop = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        quit()
-                    elif event.key == pygame.K_UP:
-                        if self.nr_of_players == 2:
-                            self.nr_of_players = 1
-                            self.drawIntroScreen()
-                    elif event.key == pygame.K_DOWN:
-                        if self.nr_of_players == 1:
-                            self.nr_of_players = 2
-                            self.drawIntroScreen()
-                    elif event.key == pygame.K_RETURN:
-                        main_loop = False
 
         del players[:]
         self.nextLevel()
@@ -1796,12 +1771,11 @@ class Game():
 
         y = 416
         while (y > 0):
-            time_passed = self.clock.tick(50)
+            self.clock.tick(50)
             for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        y = 0
-                        break
+                if event.type == pygame.JOYBUTTONDOWN:
+                    y = 0
+                    break
 
             screen.blit(screen_cp, [0, y])
             pygame.display.flip()
@@ -1998,90 +1972,41 @@ class Game():
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pass
-                elif event.type == pygame.QUIT:
-                    quit()
-                elif event.type == pygame.KEYDOWN and not self.game_over and self.active:
-
-                    if event.key == pygame.K_q:
-                        quit()
-                    # toggle sounds
-                    elif event.key == pygame.K_m:
-                        play_sounds = not play_sounds
-                        if not play_sounds:
-                            pygame.mixer.stop()
-                        else:
-                            sounds["bg"].play(-1)
-
-                    for player in players:
-                        if player.state == player.STATE_ALIVE:
-                            try:
-                                index = player.controls.index(event.key)
-                            except:
-                                pass
-                            else:
-                                if index == 0:
-                                    if player.fire() and play_sounds:
-                                        sounds["fire"].play()
-                                elif index == 1:
-                                    player.pressed[0] = True
-                                elif index == 2:
-                                    player.pressed[1] = True
-                                elif index == 3:
-                                    player.pressed[2] = True
-                                elif index == 4:
-                                    player.pressed[3] = True
                 elif event.type == pygame.JOYBUTTONDOWN and not self.game_over and self.active:
                     if event.joy == joysticks[0].get_id():
-                        if event.button == 12:
+                        if joysticks[0].get_button('BACK'):
                             quit()
                     for index, player in enumerate(players):
                         if player.state == player.STATE_ALIVE:
-                            if joysticks[index].get_button(player.joy_controls[0]):
+                            if joysticks[index].get_button('B'):
                                 if player.fire() and play_sounds:
                                     sounds["fire"].play()
                 elif event.type == pygame.JOYAXISMOTION and not self.game_over and self.active:
                     for index, player in enumerate(players):
                         if player.state == player.STATE_ALIVE:
-                            vertical_control = round(joysticks[index].get_axis(1))
-                            horiontal_control = round(joysticks[index].get_axis(0))
+                            vertical_control = round(joysticks[index].get_left_stick()[1])
+                            horizontal_control = round(joysticks[index].get_left_stick()[0])
 
                             player.pressed = [False] * 4
 
                             if vertical_control == -1:
                                 player.pressed[0] = True
-                            elif horiontal_control == 1:
+                            elif horizontal_control == 1:
                                 player.pressed[1] = True
                             elif vertical_control == 1:
                                 player.pressed[2] = True
-                            elif horiontal_control == -1:
+                            elif horizontal_control == -1:
                                 player.pressed[3] = True
-                elif event.type == pygame.KEYUP and not self.game_over and self.active:
-                    for player in players:
-                        if player.state == player.STATE_ALIVE:
-                            try:
-                                index = player.controls.index(event.key)
-                            except:
-                                pass
-                            else:
-                                if index == 1:
-                                    player.pressed[0] = False
-                                elif index == 2:
-                                    player.pressed[1] = False
-                                elif index == 3:
-                                    player.pressed[2] = False
-                                elif index == 4:
-                                    player.pressed[3] = False
-
             for player in players:
                 if player.state == player.STATE_ALIVE and not self.game_over and self.active:
                     if player.pressed[0] == True:
-                        player.move(self.DIR_UP);
+                        player.move(self.DIR_UP)
                     elif player.pressed[1] == True:
-                        player.move(self.DIR_RIGHT);
+                        player.move(self.DIR_RIGHT)
                     elif player.pressed[2] == True:
-                        player.move(self.DIR_DOWN);
+                        player.move(self.DIR_DOWN)
                     elif player.pressed[3] == True:
-                        player.move(self.DIR_LEFT);
+                        player.move(self.DIR_LEFT)
                 player.update(time_passed)
 
             for enemy in enemies:
@@ -2131,13 +2056,13 @@ class Game():
     def mapJoysticks(self):
         global players, joysticks, screen, game
 
-        screen.fill([0, 0, 0])
         usedJoys = []
 
         for player_id in range(pygame.joystick.get_count()):
 
             if player_id > 3:
                 continue
+            screen.fill([0, 0, 0])
             text = "Player " + str(player_id + 1) + " press any button"
             screen.blit(self.font.render(text, True, pygame.Color('white')), [50, 200])
             pygame.display.flip()
@@ -2148,7 +2073,8 @@ class Game():
                 for event in pygame.event.get():
                     if event.type == pygame.JOYBUTTONDOWN:
                         if event.joy not in usedJoys:
-                            joysticks.append(pygame.joystick.Joystick(event.joy))
+                            joystick = retropie_controller.Controller(event.joy)
+                            joysticks.append(joystick)
                             usedJoys.append(event.joy)
                             screen_loop = False
         self.showMenu()
