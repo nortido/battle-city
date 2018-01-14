@@ -1428,6 +1428,7 @@ class Game():
 
         while 1:
             time_passed = self.clock.tick(50)
+
             for event in pygame.event.get():
                 if event.type == pygame.JOYBUTTONDOWN:
                     if event.joy == joysticks[0].get_id():
@@ -1460,17 +1461,7 @@ class Game():
             time_passed = self.clock.tick(50)
 
             for event in pygame.event.get():
-                if event.type == pygame.JOYAXISMOTION:
-                    if joysticks[0].joystick.get_init():
-                        if round(joysticks[0].get_left_stick()[1]) == -1:
-                            if self.nr_of_players == 2:
-                                self.nr_of_players = 1
-                                self.drawIntroScreen()
-                        elif round(joysticks[0].get_left_stick()[1]) == 1:
-                            if self.nr_of_players == 1:
-                                self.nr_of_players = 2
-                                self.drawIntroScreen()
-                elif event.type == pygame.JOYBUTTONDOWN:
+                if event.type == pygame.JOYBUTTONDOWN:
                     if event.joy == joysticks[0].get_id():
                         if joysticks[0].get_button('BACK'):
                             quit()
@@ -1736,18 +1727,15 @@ class Game():
         if pygame.font.get_init():
             hiscore = self.loadHiscore()
 
-            screen.blit(self.font.render("HI- " + str(hiscore), True, pygame.Color('white')), [170, 35])
+            screen.blit(self.font.render("HI- " + str(hiscore), True, pygame.Color('white')), [190, 35])
 
-            screen.blit(self.font.render("1 PLAYER", True, pygame.Color('white')), [165, 250])
-            screen.blit(self.font.render("2 PLAYERS", True, pygame.Color('white')), [165, 275])
+            screen.blit(self.font.render("START", True, pygame.Color('white')), [220, 260])
 
+            screen.blit(self.font.render("(c) 2018 NORTORIX SOFT", True, pygame.Color('white')), [60, 320])
             screen.blit(self.font.render("(c) 1980 1985 NAMCO LTD.", True, pygame.Color('white')), [50, 350])
             screen.blit(self.font.render("ALL RIGHTS RESERVED", True, pygame.Color('white')), [85, 380])
 
-        if self.nr_of_players == 1:
-            screen.blit(self.player_image, [125, 245])
-        elif self.nr_of_players == 2:
-            screen.blit(self.player_image, [125, 270])
+        screen.blit(self.player_image, [170, 255])
 
         self.writeInBricks("battle", [65, 80])
         self.writeInBricks("city", [129, 160])
@@ -2084,7 +2072,9 @@ class Game():
                     else:
                         self.clock.tick(1)
                         self.showMenu()
+                        return
 
+        self.nr_of_players = len(joysticks)
         self.showMenu()
 
     def drawText(self, text):
