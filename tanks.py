@@ -2055,8 +2055,6 @@ class Game():
     def showMapJoysticksScreen(self):
         global players, joysticks, screen
 
-        used_joystick_ids = []
-
         for player_id in range(pygame.joystick.get_count()):
 
             wait_seconds = 5
@@ -2071,12 +2069,11 @@ class Game():
             while screen_loop:
                 for event in pygame.event.get():
                     if event.type == pygame.JOYBUTTONDOWN:
-                        if event.joy not in used_joystick_ids:
-                            joystick = retropie_controller.Controller(event.joy)
+                        joystick = retropie_controller.Controller(event.joy)
+                        if joystick not in joysticks:
                             joysticks.append(joystick)
-                            used_joystick_ids.append(event.joy)
                             screen_loop = False
-                if len(used_joystick_ids) > 0:
+                if len(joysticks) > 0:
                     if wait_seconds > 0:
                         self.clock.tick(1)
                         wait_seconds -= 1
