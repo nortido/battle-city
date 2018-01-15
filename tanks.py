@@ -2045,7 +2045,7 @@ class Game():
 
         for player_id in range(pygame.joystick.get_count()):
 
-            wait_seconds = 5
+            wait_seconds = 3
             if player_id > 3:
                 continue
 
