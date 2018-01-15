@@ -1450,7 +1450,7 @@ class Game():
         del gtimer.timers[:]
 
         # set current stage to 0
-        self.stage = 1
+        self.stage = 0
 
         self.animateIntroScreen()
 
@@ -2064,7 +2064,8 @@ class Game():
                 continue
 
             screen_loop = True
-            text = "Player " + str(player_id + 1) + " press button"
+            text = "Player " + str(player_id + 1) + " press any button"
+            loadbar_text = ""
             self.drawText(text)
 
             while screen_loop:
@@ -2079,18 +2080,25 @@ class Game():
                     if wait_seconds > 0:
                         self.clock.tick(1)
                         wait_seconds -= 1
-                        text += "."
-                        self.drawText(text)
+                        loadbar_text += "."
+                        self.drawText(loadbar_text, (0, 30), False)
                     else:
                         self.clock.tick(1)
                         self.showMenu()
 
         self.showMenu()
 
-    def drawText(self, text):
+    def drawText(self, text, position = (0, 0), is_blank = True):
+        global screen
 
-        screen.fill([0, 0, 0])
-        screen.blit(self.font.render(text, True, pygame.Color('white')), [50, 200])
+        text_surface = self.font.render(text, True, pygame.Color('white'), pygame.Color('black'))
+        center_position = (
+            screen.get_width() / 2 + position[0] - text_surface.get_width() / 2,
+            screen.get_height() / 2 + position[1] - text_surface.get_height() / 2
+        )
+        if is_blank:
+            screen.fill([0, 0, 0])
+        screen.blit(text_surface, center_position)
         pygame.display.flip()
 
 if __name__ == "__main__":
