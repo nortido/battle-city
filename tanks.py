@@ -2049,6 +2049,7 @@ class Game():
     def showMapJoysticksScreen(self):
         global players, joysticks, screen
 
+        joystick_ids = []
         for player_id in range(pygame.joystick.get_count()):
 
             wait_seconds = 3
@@ -2057,7 +2058,7 @@ class Game():
 
             screen_loop = True
             text = "Player " + str(player_id + 1) + " press any button"
-            loadbar_text = ""
+            loadbar_text = "SKIPPED"
             self.drawText(text)
 
             while screen_loop:
@@ -2066,15 +2067,18 @@ class Game():
                         quit()
                     elif event.type == pygame.JOYBUTTONDOWN:
                         joystick = retropie_controller.Controller(event.joy)
-                        if joystick not in joysticks:
+                        if joystick.get_id() not in joystick_ids:
+                            joystick_ids.append(joystick.get_id())
                             joysticks.append(joystick)
                             screen_loop = False
                 if len(joysticks) > 0:
                     if wait_seconds > 0:
+                        self.drawText(str(wait_seconds), (0, 30), False)
                         self.clock.tick(1)
                         wait_seconds -= 1
-                        loadbar_text += "."
+                    elif wait_seconds == 0:
                         self.drawText(loadbar_text, (0, 30), False)
+                        wait_seconds -= 1
                     else:
                         self.clock.tick(1)
                         self.showMenu()
