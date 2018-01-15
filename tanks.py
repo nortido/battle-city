@@ -1430,7 +1430,9 @@ class Game():
             time_passed = self.clock.tick(50)
 
             for event in pygame.event.get():
-                if event.type == pygame.JOYBUTTONDOWN:
+                if event.type == pygame.KEYDOWN:
+                    quit()
+                elif event.type == pygame.JOYBUTTONDOWN:
                     if event.joy == joysticks[0].get_id():
                         if joysticks[0].get_button('START'):
                             self.showMenu()
@@ -1461,7 +1463,9 @@ class Game():
             time_passed = self.clock.tick(50)
 
             for event in pygame.event.get():
-                if event.type == pygame.JOYBUTTONDOWN:
+                if event.type == pygame.KEYDOWN:
+                    quit()
+                elif event.type == pygame.JOYBUTTONDOWN:
                     if event.joy == joysticks[0].get_id():
                         if joysticks[0].get_button('BACK'):
                             quit()
@@ -1957,7 +1961,9 @@ class Game():
             time_passed = self.clock.tick(50)
 
             for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.KEYDOWN:
+                    quit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     pass
                 elif event.type == pygame.JOYBUTTONDOWN and not self.game_over and self.active:
                     if event.joy == joysticks[0].get_id():
@@ -2056,7 +2062,9 @@ class Game():
 
             while screen_loop:
                 for event in pygame.event.get():
-                    if event.type == pygame.JOYBUTTONDOWN:
+                    if event.type == pygame.KEYDOWN:
+                        quit()
+                    elif event.type == pygame.JOYBUTTONDOWN:
                         joystick = retropie_controller.Controller(event.joy)
                         if joystick not in joysticks:
                             joysticks.append(joystick)
