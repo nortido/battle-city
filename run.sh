@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-sudo apt-get install python-pygame
+clear
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
-cd $SCRIPT_DIR
-./tanks.py
+cd "$SCRIPT_DIR"
+python tanks.py
