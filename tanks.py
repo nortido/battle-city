@@ -2058,7 +2058,7 @@ class Game():
 
             screen_loop = True
             text = "Player " + str(player_id + 1) + " press any button"
-            loadbar_text = "STOPPED"
+            loadbar_text = "STARTING..."
             self.drawText(text)
 
             while screen_loop:
@@ -2076,14 +2076,13 @@ class Game():
                         self.drawText(str(wait_seconds), (0, 30), False)
                         self.clock.tick(1)
                         wait_seconds -= 1
-                    elif wait_seconds == 0:
-                        self.drawText(loadbar_text, (0, 30), False)
-                        wait_seconds -= 1
                     else:
+                        self.drawText(loadbar_text, (0, 0))
+                        self.nr_of_players = len(joystick_ids)
                         self.clock.tick(1)
-                        screen_loop = False
+                        self.showMenu()
+                        return
 
-        self.nr_of_players = len(joystick_ids)
         self.showMenu()
 
     def drawText(self, text, position = (0, 0), is_blank = True):
