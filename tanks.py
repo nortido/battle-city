@@ -2083,6 +2083,7 @@ class Game():
                         self.showMenu()
                         return
 
+        self.nr_of_players = len(joystick_ids)
         self.showMenu()
 
     def drawText(self, text, position = (0, 0), is_blank = True):
