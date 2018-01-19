@@ -1910,8 +1910,8 @@ class Game():
         del bullets[:]
         del enemies[:]
         del bonuses[:]
-        castle.rebuild()
         del gtimer.timers[:]
+        castle.rebuild()
 
         # load level
         self.stage += 1
@@ -2047,7 +2047,7 @@ class Game():
             self.draw()
 
     def showMapJoysticksScreen(self):
-        global players, joysticks, screen
+        global joysticks, screen
 
         joystick_ids = []
         for player_id in range(pygame.joystick.get_count()):
@@ -2083,6 +2083,7 @@ class Game():
                         self.showMenu()
                         return
 
+        self.nr_of_players = len(joystick_ids)
         self.showMenu()
 
     def drawText(self, text, position = (0, 0), is_blank = True):
