@@ -1482,22 +1482,20 @@ class Game():
 
         global players
 
+        player_sprites = (
+            (0, 0, 13 * 2, 13 * 2),
+            (16 * 2, 0, 13 * 2, 13 * 2),
+            (0, 0, 13 * 2, 13 * 2),
+            (16 * 2, 0, 13 * 2, 13 * 2),
+        )
+
         if len(players) == 0:
-            # first player
-            x = 8 * self.TILE_SIZE + (self.TILE_SIZE * 2 - 26) / 2
-            y = 24 * self.TILE_SIZE + (self.TILE_SIZE * 2 - 26) / 2
-
-            player = Player(
-                self.level, 0, [x, y], self.DIR_UP, (0, 0, 13 * 2, 13 * 2)
-            )
-            players.append(player)
-
-            # second player
-            if self.nr_of_players == 2:
-                x = 16 * self.TILE_SIZE + (self.TILE_SIZE * 2 - 26) / 2
+            for i in range(self.nr_of_players):
+                x = 8 * i * self.TILE_SIZE + (self.TILE_SIZE * 2 - 26) / 2
                 y = 24 * self.TILE_SIZE + (self.TILE_SIZE * 2 - 26) / 2
+
                 player = Player(
-                    self.level, 0, [x, y], self.DIR_UP, (16 * 2, 0, 13 * 2, 13 * 2)
+                    self.level, 0, [x, y], self.DIR_UP, player_sprites[i]
                 )
                 players.append(player)
 
@@ -1523,12 +1521,10 @@ class Game():
         hiscore = self.loadHiscore()
 
         # update hiscore if needed
-        if players[0].score > hiscore:
-            hiscore = players[0].score
-            self.saveHiscore(hiscore)
-        if self.nr_of_players == 2 and players[1].score > hiscore:
-            hiscore = players[1].score
-            self.saveHiscore(hiscore)
+        for i in range(len(players)):
+            if players[i].score > hiscore:
+                hiscore = players[i].score
+                self.saveHiscore(hiscore)
 
         img_tanks = [
             sprites.subsurface(32 * 2, 0, 13 * 2, 15 * 2),
@@ -1549,28 +1545,41 @@ class Game():
         white = pygame.Color("white")
         purple = pygame.Color(127, 64, 64)
         pink = pygame.Color(191, 160, 128)
+        text_pos_list = ([25, 95], [310, 95])
 
         screen.blit(self.font.render("HI-SCORE", False, purple), [105, 35])
         screen.blit(self.font.render(str(hiscore), False, pink), [295, 35])
-
         screen.blit(self.font.render("STAGE" + str(self.stage).rjust(3), False, white), [170, 65])
 
-        screen.blit(self.font.render("I-PLAYER", False, purple), [25, 95])
+        if self.nr_of_players <= 2:
+            for i in range(len(players)):
+                screen.blit(self.font.render(str(i + 1) + "-PLAYER", False, purple), text_pos_list[i])
 
-        # player 1 global score
-        screen.blit(self.font.render(str(players[0].score).rjust(8), False, pink), [25, 125])
+                # player i global score
+                screen.blit(
+                    self.font.render(str(players[i].score).rjust(8), False, pink),
+                    [text_pos_list[i][0], text_pos_list[i][1] + 30]
+                )
+        else:
+            for i in range(len(players) / 2):
+                screen.blit(self.font.render(str(i + 1) + "-TEAM", False, purple), text_pos_list[i])
 
-        if self.nr_of_players == 2:
-            screen.blit(self.font.render("II-PLAYER", False, purple), [310, 95])
+                score = players[i * 2].score
 
-            # player 2 global score
-            screen.blit(self.font.render(str(players[1].score).rjust(8), False, pink), [325, 125])
+                # check if player of this index is exist
+                if i * 2 + 1 < len(players):
+                    score += players[i * 2 + 1].score
 
+                # team i global score
+                screen.blit(
+                    self.font.render(str(score).rjust(8), False, pink),
+                    [text_pos_list[i][0], text_pos_list[i][1] + 30]
+                )
         # tanks and arrows
         for i in range(4):
             screen.blit(img_tanks[i], [226, 160 + (i * 45)])
             screen.blit(img_arrows[0], [206, 168 + (i * 45)])
-            if self.nr_of_players == 2:
+            if self.nr_of_players > 1:
                 screen.blit(img_arrows[1], [258, 168 + (i * 45)])
 
         screen.blit(self.font.render("TOTAL", False, white), [70, 335])
@@ -1607,7 +1616,7 @@ class Game():
                 pygame.display.flip()
                 self.clock.tick(interval)
 
-            if self.nr_of_players == 2:
+            if self.nr_of_players >= 2:
                 tanks = players[1].trophies["enemy" + str(i)]
 
                 for n in range(tanks + 1):
@@ -1631,7 +1640,7 @@ class Game():
         # total tanks
         tanks = sum([i for i in players[0].trophies.values()]) - players[0].trophies["bonus"]
         screen.blit(self.font.render(str(tanks).rjust(2), False, white), [170, 335])
-        if self.nr_of_players == 2:
+        if self.nr_of_players >= 2:
             tanks = sum([i for i in players[1].trophies.values()]) - players[1].trophies["bonus"]
             screen.blit(self.font.render(str(tanks).rjust(2), False, white), [277, 335])
 
@@ -1706,14 +1715,10 @@ class Game():
         if pygame.font.get_init():
             text_color = pygame.Color('black')
             for n in range(len(players)):
-                if n == 0:
-                    screen.blit(self.font.render(str(n + 1) + "P", False, text_color), [x + 16, y + 200])
-                    screen.blit(self.font.render(str(players[n].lives), False, text_color), [x + 31, y + 215])
-                    screen.blit(self.player_life_image, [x + 17, y + 215])
-                else:
-                    screen.blit(self.font.render(str(n + 1) + "P", False, text_color), [x + 16, y + 240])
-                    screen.blit(self.font.render(str(players[n].lives), False, text_color), [x + 31, y + 255])
-                    screen.blit(self.player_life_image, [x + 17, y + 255])
+                player_correct_y = n * 40
+                screen.blit(self.font.render(str(n + 1) + "P", False, text_color), [x + 16, y + 200 + player_correct_y])
+                screen.blit(self.font.render(str(players[n].lives), False, text_color), [x + 31, y + 215 + player_correct_y])
+                screen.blit(self.player_life_image, [x + 17, y + player_correct_y])
 
             screen.blit(self.flag_image, [x + 17, y + 280])
             screen.blit(self.font.render(str(self.stage), False, text_color), [x + 17, y + 312])
