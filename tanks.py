@@ -1718,10 +1718,10 @@ class Game():
                 player_correct_y = n * 40
                 screen.blit(self.font.render(str(n + 1) + "P", False, text_color), [x + 16, y + 200 + player_correct_y])
                 screen.blit(self.font.render(str(players[n].lives), False, text_color), [x + 31, y + 215 + player_correct_y])
-                screen.blit(self.player_life_image, [x + 17, y + player_correct_y])
+                screen.blit(self.player_life_image, [x + 17, y + 215 + player_correct_y])
 
-            screen.blit(self.flag_image, [x + 17, y + 280])
-            screen.blit(self.font.render(str(self.stage), False, text_color), [x + 17, y + 312])
+            screen.blit(self.flag_image, [x + 17, y + 350])
+            screen.blit(self.font.render(str(self.stage), False, text_color), [x + 17, y + 400])
 
     def drawIntroScreen(self, put_on_surface=True):
         """ Draw intro (menu) screen
