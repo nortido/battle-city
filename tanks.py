@@ -2047,18 +2047,16 @@ class Game():
             self.draw()
 
     def mapJoysticksScreen(self):
-        global players, joysticks, screen
+        global players, joysticks, screen, sounds
 
         joystick_ids = []
+        wait_time = 4000
+
+        text = "Press any button to join"
+        self.drawText(text, (0, 0))
+
         for player_id in range(pygame.joystick.get_count()):
-
-            wait_seconds = 3
-            if player_id > 3:
-                continue
-
             screen_loop = True
-            text = "Player " + str(player_id + 1) + " press any button"
-            self.drawText(text)
 
             while screen_loop:
                 for event in pygame.event.get():
@@ -2069,14 +2067,23 @@ class Game():
                         if joystick.get_id() not in joystick_ids:
                             joystick_ids.append(joystick.get_id())
                             joysticks.append(joystick)
+
                             screen_loop = False
-                if len(joystick_ids) > 0:
-                    if wait_seconds > 0 and len(joystick_ids) < pygame.joystick.get_count():
-                        self.drawText(str(wait_seconds), (0, 30), False)
-                        self.clock.tick(1)
-                        wait_seconds -= 1
-                    else:
+
+                            text = str(len(joysticks)) + " player"
+                            if (len(joysticks) > 1):
+                                text += "s"
+                            sounds["fire"].play()
+                            self.drawText(text, (0, 30), False)
+                time_passed = self.clock.tick(50)
+                if wait_time > 0:
+                    self.drawText(str(wait_time // 1000) + "...", (0, 70), False)
+                    wait_time -= time_passed
+                else:
+                    if len(joysticks) > 0:
                         screen_loop = False
+                    else:
+                        self.drawText("WAITING...", (0, 70), False)
 
         self.nr_of_players = len(joystick_ids)
         self.showMenu()
