@@ -1719,7 +1719,7 @@ class Game():
                 screen.blit(self.font.render(str(players[n].lives), False, text_color), [x + 31, y + 215 + player_correct_y])
                 screen.blit(self.player_life_image, [x + 17, y + 215 + player_correct_y])
 
-            screen.blit(self.flag_image, [x + 17, y + 350])
+            screen.blit(self.flag_image, [x + 17, y + 360])
             screen.blit(self.font.render(str(self.stage), False, text_color), [x + 17, y + 400])
 
     def drawIntroScreen(self, put_on_surface=True):
