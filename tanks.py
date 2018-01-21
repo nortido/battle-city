@@ -1252,11 +1252,10 @@ class Game():
 
         pygame.init()
 
-        pygame.joystick.init()
         pygame.mouse.set_visible(False)
         
-        for joystick_id in range(pygame.joystick.get_count()):
-            joystick = pygame.joystick.Joystick(joystick_id)
+        for id in range(pygame.joystick.get_count()):
+            joystick = pygame.joystick.Joystick(id)
             joystick.init()
 
         pygame.display.set_caption("Battle City")
@@ -2051,44 +2050,50 @@ class Game():
 
             self.draw()
 
-    def showMapJoysticksScreen(self):
-        global joysticks, screen
+    def mapJoysticksScreen(self):
+        global players, joysticks, screen, sounds
 
-        joystick_ids = []
-        for player_id in range(pygame.joystick.get_count()):
+        wait_time = 4000
 
-            wait_seconds = 3
-            if player_id > 3:
-                continue
+        text = "Press any button to join"
+        self.drawText(text, (0, 0))
 
-            screen_loop = True
-            text = "Player " + str(player_id + 1) + " press any button"
-            loadbar_text = "STARTING..."
-            self.drawText(text)
+        screen_loop = True
+        waiting_flag = False
 
-            while screen_loop:
-                for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN:
-                        quit()
-                    elif event.type == pygame.JOYBUTTONDOWN:
-                        joystick = retropie_controller.Controller(event.joy)
-                        if joystick.get_id() not in joystick_ids:
-                            joystick_ids.append(joystick.get_id())
-                            joysticks.append(joystick)
+        while screen_loop:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    quit()
+                elif event.type == pygame.JOYBUTTONDOWN:
+                    joy_id = event.joy
+                    joy_ids = (joy.get_id() for joy in joysticks)
+
+                    if joy_id not in joy_ids:
+                        joystick = retropie_controller.Controller(joy_id)
+                        joysticks.append(joystick)
+
+                        if waiting_flag:
                             screen_loop = False
-                if len(joystick_ids) > 0:
-                    if wait_seconds > 0:
-                        self.drawText(str(wait_seconds), (0, 30), False)
-                        self.clock.tick(1)
-                        wait_seconds -= 1
-                    else:
-                        self.drawText(loadbar_text, (0, 0))
-                        self.nr_of_players = len(joystick_ids)
-                        self.clock.tick(1)
-                        self.showMenu()
-                        return
 
-        self.nr_of_players = len(joystick_ids)
+                        text = str(len(joysticks)) + " player"
+                        if (len(joysticks) > 1):
+                            text += "s"
+
+                        sounds["fire"].play()
+                        self.drawText(text, (0, 35), False)
+            time_passed = self.clock.tick(50)
+            if wait_time > 0:
+                self.drawText(str(wait_time // 1000) + "...", (0, 70), False)
+                wait_time -= time_passed
+            else:
+                if len(joysticks) > 0:
+                    screen_loop = False
+                else:
+                    self.drawText("WAITING...", (0, 70), False)
+                    waiting_flag = True
+
+        self.nr_of_players = len(joysticks)
         self.showMenu()
 
     def drawText(self, text, position = (0, 0), is_blank = True):
@@ -2121,4 +2126,4 @@ if __name__ == "__main__":
 
     game = Game()
     castle = Castle()
-    game.showMapJoysticksScreen()
+    game.mapJoysticksScreen()
