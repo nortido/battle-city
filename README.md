@@ -1,6 +1,6 @@
 # Battle City
 
-Game for 4 players for Retropie.
+Retropie game for 4 players.
 
 ## Install
 
