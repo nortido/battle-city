@@ -728,17 +728,17 @@ class Tank():
             self.image = self.image_left
 
         if fix_position:
-            new_x = self.nearest(self.rect.left, 8) + 3
-            new_y = self.nearest(self.rect.top, 8) + 3
+            new_x = self.nearest(self.rect.left, 16)
+            new_y = self.nearest(self.rect.top, 16)
 
-            if (abs(self.rect.left - new_x) < 5):
-                self.rect.left = new_x
+            if (abs(self.rect.left - new_x) < 10):
+                self.rect.left = new_x + 3
 
-            if (abs(self.rect.top - new_y) < 5):
-                self.rect.top = new_y
+            if (abs(self.rect.top - new_y) < 10):
+                self.rect.top = new_y + 3
 
     def turnAround(self):
-        """ Turn tank into opposite direction """
+        """ Turn tank into opposite direction """ 
         if self.direction in (self.DIR_UP, self.DIR_RIGHT):
             self.rotate(self.direction + 2, False)
         else:
