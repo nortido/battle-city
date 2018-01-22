@@ -2046,7 +2046,7 @@ class Game():
 
             self.draw()
 
-    def showMapJoysticksScreen(self):
+    def mapJoysticksScreen(self):
         global players, joysticks, screen
 
         joystick_ids = []
@@ -2058,7 +2058,6 @@ class Game():
 
             screen_loop = True
             text = "Player " + str(player_id + 1) + " press any button"
-            loadbar_text = "STARTING..."
             self.drawText(text)
 
             while screen_loop:
@@ -2072,17 +2071,14 @@ class Game():
                             joysticks.append(joystick)
                             screen_loop = False
                 if len(joystick_ids) > 0:
-                    if wait_seconds > 0:
+                    if wait_seconds > 0 and len(joystick_ids) < pygame.joystick.get_count():
                         self.drawText(str(wait_seconds), (0, 30), False)
                         self.clock.tick(1)
                         wait_seconds -= 1
                     else:
-                        self.drawText(loadbar_text, (0, 0))
-                        self.nr_of_players = len(joystick_ids)
-                        self.clock.tick(1)
-                        self.showMenu()
-                        return
+                        screen_loop = False
 
+        self.nr_of_players = len(joystick_ids)
         self.showMenu()
 
     def drawText(self, text, position = (0, 0), is_blank = True):
@@ -2115,4 +2111,4 @@ if __name__ == "__main__":
 
     game = Game()
     castle = Castle()
-    game.showMapJoysticksScreen()
+    game.mapJoysticksScreen()
