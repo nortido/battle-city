@@ -1645,9 +1645,8 @@ class Game():
 
         pygame.display.flip()
 
-        # do nothing for 2 seconds
-        self.clock.tick(1)
-        self.clock.tick(1)
+        # do nothing for 5 seconds
+        time.sleep(5)
 
         if self.game_over:
             self.gameOverScreen()
