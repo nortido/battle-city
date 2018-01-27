@@ -1,5 +1,3 @@
 #!/usr/bin/env bash
-SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
-pwd
-cd ./battle-city/source/
+cd /home/pi/RetroPie/roms/ports/battle-city/source/
 python tanks.py
