@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
-cd ./battle-city/source/
+SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
+cd "$SCRIPT_DIR/battle-city/source/"
 python tanks.py
