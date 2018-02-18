@@ -1400,7 +1400,6 @@ class Game():
 
         global play_sounds, sounds
 
-        print "Game Over"
         if play_sounds:
             for sound in sounds:
                 sounds[sound].stop()
@@ -1426,8 +1425,6 @@ class Game():
         pygame.display.flip()
 
         while 1:
-            time_passed = self.clock.tick(50)
-
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     quit()
@@ -1550,30 +1547,27 @@ class Game():
         screen.blit(self.font.render(str(hiscore), False, pink), [295, 35])
         screen.blit(self.font.render("STAGE" + str(self.stage).rjust(3), False, white), [170, 65])
 
-        if self.nr_of_players <= 2:
-            for i in range(len(players)):
-                screen.blit(self.font.render(str(i + 1) + "-PLAYER", False, purple), text_pos_list[i])
-
-                # player i global score
-                screen.blit(
-                    self.font.render(str(players[i].score).rjust(8), False, pink),
-                    [text_pos_list[i][0], text_pos_list[i][1] + 30]
-                )
-        else:
-            for i in range(len(players) / 2):
-                screen.blit(self.font.render(str(i + 1) + "-TEAM", False, purple), text_pos_list[i])
-
+        maxCountTeams = 2
+        for i in range(maxCountTeams):
+            if self.nr_of_players <= 2:
+                teamLabel = "-PLAYER"
+                score = players[i].score
+            else:
+                teamLabel = "-TEAM"
                 score = players[i * 2].score
 
                 # check if player of this index is exist
                 if i * 2 + 1 < len(players):
                     score += players[i * 2 + 1].score
 
-                # team i global score
-                screen.blit(
-                    self.font.render(str(score).rjust(8), False, pink),
-                    [text_pos_list[i][0], text_pos_list[i][1] + 30]
-                )
+            screen.blit(self.font.render(str(i + 1) + teamLabel, False, purple), text_pos_list[i])
+
+            # team i global score
+            screen.blit(
+                self.font.render(str(score).rjust(8), False, pink),
+                [text_pos_list[i][0], text_pos_list[i][1] + 30]
+            )
+
         # tanks and arrows
         for i in range(4):
             screen.blit(img_tanks[i], [226, 160 + (i * 45)])
@@ -1645,8 +1639,8 @@ class Game():
 
         pygame.display.flip()
 
-        # do nothing for 5 seconds
-        time.sleep(5)
+        # do nothing for 8 seconds
+        time.sleep(8)
 
         if self.game_over:
             self.gameOverScreen()
