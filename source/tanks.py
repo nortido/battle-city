@@ -1644,14 +1644,14 @@ class Game():
         # total tanks
         tanks = sum([i for i in players[0].trophies.values()]) - players[0].trophies["bonus"]
         if self.nr_of_players >= 3:
-            tanks += sum([i for i in players[2].trophies.values()]) - players[0].trophies["bonus"]
+            tanks += sum([i for i in players[2].trophies.values()]) - players[2].trophies["bonus"]
 
         screen.blit(self.font.render(str(tanks).rjust(2), False, white), [170, 335])
 
         if self.nr_of_players >= 2:
             tanks = sum([i for i in players[1].trophies.values()]) - players[1].trophies["bonus"]
             if self.nr_of_players == 4:
-                tanks += sum([i for i in players[3].trophies.values()]) - players[1].trophies["bonus"]
+                tanks += sum([i for i in players[3].trophies.values()]) - players[3].trophies["bonus"]
 
             screen.blit(self.font.render(str(tanks).rjust(2), False, white), [277, 335])
 
