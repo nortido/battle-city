@@ -1252,11 +1252,10 @@ class Game():
 
         pygame.init()
 
-        pygame.joystick.init()
         pygame.mouse.set_visible(False)
         
-        for joystick_id in range(pygame.joystick.get_count()):
-            joystick = pygame.joystick.Joystick(joystick_id)
+        for id in range(pygame.joystick.get_count()):
+            joystick = pygame.joystick.Joystick(id)
             joystick.init()
 
         pygame.display.set_caption("Battle City")
@@ -1401,7 +1400,6 @@ class Game():
 
         global play_sounds, sounds
 
-        print "Game Over"
         if play_sounds:
             for sound in sounds:
                 sounds[sound].stop()
@@ -1427,8 +1425,6 @@ class Game():
         pygame.display.flip()
 
         while 1:
-            time_passed = self.clock.tick(50)
-
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     quit()
@@ -1482,22 +1478,20 @@ class Game():
 
         global players
 
+        player_sprites = (
+            (0, 0, 13 * 2, 13 * 2),
+            (16 * 2, 0, 13 * 2, 13 * 2),
+            (0, 0, 13 * 2, 13 * 2),
+            (16 * 2, 0, 13 * 2, 13 * 2),
+        )
+
         if len(players) == 0:
-            # first player
-            x = 8 * self.TILE_SIZE + (self.TILE_SIZE * 2 - 26) / 2
-            y = 24 * self.TILE_SIZE + (self.TILE_SIZE * 2 - 26) / 2
-
-            player = Player(
-                self.level, 0, [x, y], self.DIR_UP, (0, 0, 13 * 2, 13 * 2)
-            )
-            players.append(player)
-
-            # second player
-            if self.nr_of_players == 2:
-                x = 16 * self.TILE_SIZE + (self.TILE_SIZE * 2 - 26) / 2
+            for i in range(self.nr_of_players):
+                x = 8 * i * self.TILE_SIZE + (self.TILE_SIZE * 2 - 26) / 2
                 y = 24 * self.TILE_SIZE + (self.TILE_SIZE * 2 - 26) / 2
+
                 player = Player(
-                    self.level, 0, [x, y], self.DIR_UP, (16 * 2, 0, 13 * 2, 13 * 2)
+                    self.level, 0, [x, y], self.DIR_UP, player_sprites[i]
                 )
                 players.append(player)
 
@@ -1523,12 +1517,10 @@ class Game():
         hiscore = self.loadHiscore()
 
         # update hiscore if needed
-        if players[0].score > hiscore:
-            hiscore = players[0].score
-            self.saveHiscore(hiscore)
-        if self.nr_of_players == 2 and players[1].score > hiscore:
-            hiscore = players[1].score
-            self.saveHiscore(hiscore)
+        for i in range(len(players)):
+            if players[i].score > hiscore:
+                hiscore = players[i].score
+                self.saveHiscore(hiscore)
 
         img_tanks = [
             sprites.subsurface(32 * 2, 0, 13 * 2, 15 * 2),
@@ -1549,28 +1541,41 @@ class Game():
         white = pygame.Color("white")
         purple = pygame.Color(127, 64, 64)
         pink = pygame.Color(191, 160, 128)
+        text_pos_list = ([25, 95], [310, 95])
 
         screen.blit(self.font.render("HI-SCORE", False, purple), [105, 35])
         screen.blit(self.font.render(str(hiscore), False, pink), [295, 35])
-
         screen.blit(self.font.render("STAGE" + str(self.stage).rjust(3), False, white), [170, 65])
 
-        screen.blit(self.font.render("I-PLAYER", False, purple), [25, 95])
+        maxCountTeams = 2
+        if self.nr_of_players == 1:
+            maxCountTeams = 1
 
-        # player 1 global score
-        screen.blit(self.font.render(str(players[0].score).rjust(8), False, pink), [25, 125])
+        for i in range(maxCountTeams):
+            if self.nr_of_players <= 2:
+                teamLabel = "-PLAYER"
+                score = players[i].score
+            else:
+                teamLabel = "-TEAM"
+                score = players[i].score
 
-        if self.nr_of_players == 2:
-            screen.blit(self.font.render("II-PLAYER", False, purple), [310, 95])
+                # check if player of this index is exist
+                if i + 2 < len(players):
+                    score += players[i + 2].score
 
-            # player 2 global score
-            screen.blit(self.font.render(str(players[1].score).rjust(8), False, pink), [325, 125])
+            screen.blit(self.font.render(str(i + 1) + teamLabel, False, purple), text_pos_list[i])
+
+            # team i global score
+            screen.blit(
+                self.font.render(str(score).rjust(8), False, pink),
+                [text_pos_list[i][0], text_pos_list[i][1] + 30]
+            )
 
         # tanks and arrows
         for i in range(4):
             screen.blit(img_tanks[i], [226, 160 + (i * 45)])
             screen.blit(img_arrows[0], [206, 168 + (i * 45)])
-            if self.nr_of_players == 2:
+            if self.nr_of_players > 1:
                 screen.blit(img_arrows[1], [258, 168 + (i * 45)])
 
         screen.blit(self.font.render("TOTAL", False, white), [70, 335])
@@ -1589,15 +1594,19 @@ class Game():
 
             # total specific tanks
             tanks = players[0].trophies["enemy" + str(i)]
+            if self.nr_of_players > 2:
+                tanks += players[2].trophies["enemy" + str(i)]
 
             for n in range(tanks + 1):
                 if n > 0 and play_sounds:
                     sounds["score"].play()
 
                 # erase previous text
-                screen.blit(self.font.render(str(n - 1).rjust(2), False, black), [170, 168 + (i * 45)])
+                screen.blit(self.font.render(str(n - 1).rjust(2), False, black),
+                            [170, 168 + (i * 45)])
                 # print new number of enemies
-                screen.blit(self.font.render(str(n).rjust(2), False, white), [170, 168 + (i * 45)])
+                screen.blit(self.font.render(str(n).rjust(2), False, white),
+                            [170, 168 + (i * 45)])
                 # erase previous text
                 screen.blit(self.font.render(str((n - 1) * (i + 1) * 100).rjust(4) + " PTS", False, black),
                             [25, 168 + (i * 45)])
@@ -1607,17 +1616,21 @@ class Game():
                 pygame.display.flip()
                 self.clock.tick(interval)
 
-            if self.nr_of_players == 2:
+            if self.nr_of_players >= 2:
+
                 tanks = players[1].trophies["enemy" + str(i)]
+                if self.nr_of_players > 3:
+                    tanks += players[3].trophies["enemy" + str(i)]
 
                 for n in range(tanks + 1):
 
                     if n > 0 and play_sounds:
                         sounds["score"].play()
 
-                    screen.blit(self.font.render(str(n - 1).rjust(2), False, black), [277, 168 + (i * 45)])
-                    screen.blit(self.font.render(str(n).rjust(2), False, white), [277, 168 + (i * 45)])
-
+                    screen.blit(self.font.render(str(n - 1).rjust(2), False, black),
+                                [277, 168 + (i * 45)])
+                    screen.blit(self.font.render(str(n).rjust(2), False, white),
+                                [277, 168 + (i * 45)])
                     screen.blit(self.font.render(str((n - 1) * (i + 1) * 100).rjust(4) + " PTS", False, black),
                                 [325, 168 + (i * 45)])
                     screen.blit(self.font.render(str(n * (i + 1) * 100).rjust(4) + " PTS", False, white),
@@ -1630,16 +1643,24 @@ class Game():
 
         # total tanks
         tanks = sum([i for i in players[0].trophies.values()]) - players[0].trophies["bonus"]
+        if self.nr_of_players >= 3:
+            tanks += sum([i for i in players[2].trophies.values()]) - players[2].trophies["bonus"]
+
         screen.blit(self.font.render(str(tanks).rjust(2), False, white), [170, 335])
-        if self.nr_of_players == 2:
+
+        if self.nr_of_players >= 2:
             tanks = sum([i for i in players[1].trophies.values()]) - players[1].trophies["bonus"]
+            if self.nr_of_players == 4:
+                tanks += sum([i for i in players[3].trophies.values()]) - players[3].trophies["bonus"]
+
             screen.blit(self.font.render(str(tanks).rjust(2), False, white), [277, 335])
+
+
 
         pygame.display.flip()
 
-        # do nothing for 2 seconds
-        self.clock.tick(1)
-        self.clock.tick(1)
+        # do nothing for 8 seconds
+        time.sleep(8)
 
         if self.game_over:
             self.gameOverScreen()
@@ -1706,17 +1727,13 @@ class Game():
         if pygame.font.get_init():
             text_color = pygame.Color('black')
             for n in range(len(players)):
-                if n == 0:
-                    screen.blit(self.font.render(str(n + 1) + "P", False, text_color), [x + 16, y + 200])
-                    screen.blit(self.font.render(str(players[n].lives), False, text_color), [x + 31, y + 215])
-                    screen.blit(self.player_life_image, [x + 17, y + 215])
-                else:
-                    screen.blit(self.font.render(str(n + 1) + "P", False, text_color), [x + 16, y + 240])
-                    screen.blit(self.font.render(str(players[n].lives), False, text_color), [x + 31, y + 255])
-                    screen.blit(self.player_life_image, [x + 17, y + 255])
+                player_correct_y = n * 40
+                screen.blit(self.font.render(str(n + 1) + "P", False, text_color), [x + 16, y + 200 + player_correct_y])
+                screen.blit(self.font.render(str(players[n].lives), False, text_color), [x + 31, y + 215 + player_correct_y])
+                screen.blit(self.player_life_image, [x + 17, y + 215 + player_correct_y])
 
-            screen.blit(self.flag_image, [x + 17, y + 280])
-            screen.blit(self.font.render(str(self.stage), False, text_color), [x + 17, y + 312])
+            screen.blit(self.flag_image, [x + 17, y + 360])
+            screen.blit(self.font.render(str(self.stage), False, text_color), [x + 17, y + 400])
 
     def drawIntroScreen(self, put_on_surface=True):
         """ Draw intro (menu) screen
@@ -1910,8 +1927,8 @@ class Game():
         del bullets[:]
         del enemies[:]
         del bonuses[:]
-        castle.rebuild()
         del gtimer.timers[:]
+        castle.rebuild()
 
         # load level
         self.stage += 1
@@ -2047,38 +2064,49 @@ class Game():
             self.draw()
 
     def mapJoysticksScreen(self):
-        global players, joysticks, screen
+        global players, joysticks, screen, sounds
 
-        joystick_ids = []
-        for player_id in range(pygame.joystick.get_count()):
+        wait_time = 4000
 
-            wait_seconds = 3
-            if player_id > 3:
-                continue
+        text = "Press any button to join"
+        self.drawText(text, (0, 0))
 
-            screen_loop = True
-            text = "Player " + str(player_id + 1) + " press any button"
-            self.drawText(text)
+        screen_loop = True
+        waiting_flag = False
 
-            while screen_loop:
-                for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN:
-                        quit()
-                    elif event.type == pygame.JOYBUTTONDOWN:
-                        joystick = retropie_controller.Controller(event.joy)
-                        if joystick.get_id() not in joystick_ids:
-                            joystick_ids.append(joystick.get_id())
-                            joysticks.append(joystick)
+        while screen_loop:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    quit()
+                elif event.type == pygame.JOYBUTTONDOWN:
+                    joy_id = event.joy
+                    joy_ids = (joy.get_id() for joy in joysticks)
+
+                    if joy_id not in joy_ids:
+                        joystick = retropie_controller.Controller(joy_id)
+                        joysticks.append(joystick)
+
+                        if waiting_flag:
                             screen_loop = False
-                if len(joystick_ids) > 0:
-                    if wait_seconds > 0 and len(joystick_ids) < pygame.joystick.get_count():
-                        self.drawText(str(wait_seconds), (0, 30), False)
-                        self.clock.tick(1)
-                        wait_seconds -= 1
-                    else:
-                        screen_loop = False
 
-        self.nr_of_players = len(joystick_ids)
+                        text = str(len(joysticks)) + " player"
+                        if (len(joysticks) > 1):
+                            text += "s"
+
+                        sounds["fire"].play()
+                        self.drawText(text, (0, 35), False)
+            time_passed = self.clock.tick(50)
+            if wait_time > 0:
+                self.drawText(str(wait_time // 1000) + "...", (0, 70), False)
+                wait_time -= time_passed
+            else:
+                if len(joysticks) > 0:
+                    screen_loop = False
+                else:
+                    self.drawText("WAITING...", (0, 70), False)
+                    waiting_flag = True
+
+        self.nr_of_players = len(joysticks)
         self.showMenu()
 
     def drawText(self, text, position = (0, 0), is_blank = True):
