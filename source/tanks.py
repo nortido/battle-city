@@ -1548,17 +1548,20 @@ class Game():
         screen.blit(self.font.render("STAGE" + str(self.stage).rjust(3), False, white), [170, 65])
 
         maxCountTeams = 2
+        if self.nr_of_players == 1:
+            maxCountTeams = 1
+
         for i in range(maxCountTeams):
             if self.nr_of_players <= 2:
                 teamLabel = "-PLAYER"
                 score = players[i].score
             else:
                 teamLabel = "-TEAM"
-                score = players[i * 2].score
+                score = players[i].score
 
                 # check if player of this index is exist
-                if i * 2 + 1 < len(players):
-                    score += players[i * 2 + 1].score
+                if i + 2 < len(players):
+                    score += players[i + 2].score
 
             screen.blit(self.font.render(str(i + 1) + teamLabel, False, purple), text_pos_list[i])
 
@@ -1591,15 +1594,19 @@ class Game():
 
             # total specific tanks
             tanks = players[0].trophies["enemy" + str(i)]
+            if self.nr_of_players > 2:
+                tanks += players[2].trophies["enemy" + str(i)]
 
             for n in range(tanks + 1):
                 if n > 0 and play_sounds:
                     sounds["score"].play()
 
                 # erase previous text
-                screen.blit(self.font.render(str(n - 1).rjust(2), False, black), [170, 168 + (i * 45)])
+                screen.blit(self.font.render(str(n - 1).rjust(2), False, black),
+                            [170, 168 + (i * 45)])
                 # print new number of enemies
-                screen.blit(self.font.render(str(n).rjust(2), False, white), [170, 168 + (i * 45)])
+                screen.blit(self.font.render(str(n).rjust(2), False, white),
+                            [170, 168 + (i * 45)])
                 # erase previous text
                 screen.blit(self.font.render(str((n - 1) * (i + 1) * 100).rjust(4) + " PTS", False, black),
                             [25, 168 + (i * 45)])
@@ -1610,16 +1617,20 @@ class Game():
                 self.clock.tick(interval)
 
             if self.nr_of_players >= 2:
+                
                 tanks = players[1].trophies["enemy" + str(i)]
+                if self.nr_of_players > 3:
+                    tanks += players[3].trophies["enemy" + str(i)]
 
                 for n in range(tanks + 1):
 
                     if n > 0 and play_sounds:
                         sounds["score"].play()
 
-                    screen.blit(self.font.render(str(n - 1).rjust(2), False, black), [277, 168 + (i * 45)])
-                    screen.blit(self.font.render(str(n).rjust(2), False, white), [277, 168 + (i * 45)])
-
+                    screen.blit(self.font.render(str(n - 1).rjust(2), False, black),
+                                [277, 168 + (i * 45)])
+                    screen.blit(self.font.render(str(n).rjust(2), False, white),
+                                [277, 168 + (i * 45)])
                     screen.blit(self.font.render(str((n - 1) * (i + 1) * 100).rjust(4) + " PTS", False, black),
                                 [325, 168 + (i * 45)])
                     screen.blit(self.font.render(str(n * (i + 1) * 100).rjust(4) + " PTS", False, white),
